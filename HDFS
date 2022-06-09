@@ -1,0 +1,100 @@
+hduser@bmsce-Precision-T1700:~$ start-all.sh
+This script is Deprecated. Instead use start-dfs.sh and start-yarn.sh
+Starting namenodes on [localhost]
+hduser@localhost's password:
+localhost: namenode running as process 6088. Stop it first.
+hduser@localhost's password:
+localhost: datanode running as process 6269. Stop it first.
+Starting secondary namenodes [0.0.0.0]
+hduser@0.0.0.0's password:
+0.0.0.0: secondarynamenode running as process 6487. Stop it first.
+starting yarn daemons
+resourcemanager running as process 6646. Stop it first.
+hduser@localhost's password:
+localhost: nodemanager running as process 6979. Stop it first.
+hduser@bmsce-Precision-T1700:~$ jps
+6979 NodeManager
+6646 ResourceManager
+6487 SecondaryNameNode
+12184 Jps
+6088 NameNode
+6269 DataNode
+hduser@bmsce-Precision-T1700:~$ hdfs dfs -mkdir /Supriya
+mkdir: `/Supriya': File exists
+hduser@bmsce-Precision-T1700:~$ hdfs dfs -mkdir /Student
+hduser@bmsce-Precision-T1700:~$ hadoop fs -ls /
+Found 12 items
+drwxr-xr-x   - hduser supergroup          0 2022-06-04 09:47 /Employee
+drwxr-xr-x   - hduser supergroup          0 2022-06-04 09:53 /Student
+drwxr-xr-x   - hduser supergroup          0 2022-06-04 09:52 /Supriya
+drwxr-xr-x   - hduser supergroup          0 2022-06-01 09:55 /cs184
+drwxr-xr-x   - hduser supergroup          0 2022-06-03 15:24 /dee
+drwxr-xr-x   - hduser supergroup          0 2022-06-03 14:51 /dishabhaskar
+drwxr-xr-x   - hduser supergroup          0 2022-06-03 12:21 /final_hari
+drwxr-xr-x   - hduser supergroup          0 2022-06-03 12:24 /final_nisar
+drwxr-xr-x   - hduser supergroup          0 2022-06-03 12:46 /final_nisarga
+drwxr-xr-x   - hduser supergroup          0 2022-06-03 12:06 /hari
+drwxr-xr-x   - hduser supergroup          0 2022-06-03 12:38 /nisargas
+drwxr-xr-x   - hduser supergroup          0 2022-06-01 14:56 /yay
+
+hduser@bmsce-Precision-T1700:~$ hdfs dfs -put /home/hduser/Desktop/xyz.txt /Student/srs.txt
+hduser@bmsce-Precision-T1700:~$ hdfs dfs -cat /Student/srs.txt
+CSE
+ISE
+EC
+ME
+EE
+
+hduser@bmsce-Precision-T1700:~$ hdfs dfs -copyFromLocal /home/hduser/Desktop/xyz.txt /Student/zyx.txt
+duser@bmsce-Precision-T1700:~$ hdfs dfs -cat /Student/zyx.txt
+CSE
+ISE
+EC
+ME
+EE
+
+
+duser@bmsce-Precision-T1700:~$ sudo nano hadoop.txt
+[sudo] password for hduser:
+
+duser@bmsce-Precision-T1700:~$ hdfs dfs -get /Student/srs.txt /home/hduser/Downloads/new.txt
+/////new file named new.txt is created in downloads with contents of srs.txt
+
+hdfs dfs -getmerge /Student/srs.txt /Student/zyx.txt /home/hduser/Desktop/Merge.txt
+//output:merge.txt created in desktop
+CSE
+ISE
+EC
+ME
+EE
+CSE
+ISE
+EC
+ME
+EE
+
+
+hduser@bmsce-Precision-T1700:~$ hadoop fs -getfacl /Student/
+# file: /Student
+# owner: hduser
+# group: supergroup
+user::rwx
+group::r-x
+other::r-x
+
+
+hduser@bmsce-Precision-T1700:~$ hdfs dfs -copyToLocal /Student/srs.txt /home/hduser/Desktop/sss.txt
+//content of sss.txt created in desktop
+CSE
+ISE
+EC
+ME
+EE
+
+
+hduser@bmsce-Precision-T1700:~$ hdfs dfs -cat /Student/srs.txt
+CSE
+ISE
+EC
+ME
+EE
