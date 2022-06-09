@@ -1,0 +1,62 @@
+bmsce@bmsce-Precision-T1700:~$ mongo
+MongoDB shell version v3.6.8
+connecting to: mongodb://127.0.0.1:27017
+Implicit session: session { "id" : UUID("d66acdb3-8482-417d-8b75-d65dae4b53ee") }
+MongoDB server version: 3.6.8
+Server has startup warnings: 
+2022-04-11T18:49:15.627+0530 I STORAGE  [initandlisten] 
+2022-04-11T18:49:15.627+0530 I STORAGE  [initandlisten] ** WARNING: Using the XFS filesystem is strongly recommended with the WiredTiger storage engine
+2022-04-11T18:49:15.627+0530 I STORAGE  [initandlisten] **          See http://dochub.mongodb.org/core/prodnotes-filesystem
+2022-04-11T18:49:18.771+0530 I CONTROL  [initandlisten] 
+2022-04-11T18:49:18.771+0530 I CONTROL  [initandlisten] ** WARNING: Access control is not enabled for the database.
+2022-04-11T18:49:18.771+0530 I CONTROL  [initandlisten] **          Read and write access to data and configuration is unrestricted.
+2022-04-11T18:49:18.771+0530 I CONTROL  [initandlisten] 
+
+use Employee
+switched to db Employee
+
+db.createCollection("Employee");
+{ "ok" : 1 }
+
+show collections;
+Employee
+
+db.Employee.insert({Emp_id:1,Name:"Ravi",Designation:"Manager",Experience:"3_years"});
+WriteResult({ "nInserted" : 1 })
+
+db.Employee.insertMany([
+  {Emp_id:2,Name:"Raj",Designation:"HR",Experience:"5_years" },
+   {Emp_id:6,Name:"Rekha",Designation:"CEO",Experience:"10_years" }
+]);
+WriteResult({ "nInserted" : 1 })
+{
+	"acknowledged" : true,
+	"insertedIds" : [
+		ObjectId("62a21013cb0f317b8d1eed64"),
+		ObjectId("62a21013cb0f317b8d1eed65")
+	]
+}
+
+db.Employee.find();
+{ "_id" : ObjectId("62a20f4e5ac3ac8c60471ff7"), "Emp_id" : 1, "Name" : "Ravi", "Designation" : "Manager", "Experience" : "3_years" }
+{ "_id" : ObjectId("62a20fe6b95714dc08dab8a4"), "Emp_id" : 2, "Name" : "Raj", "Designation" : "HR", "Experience" : "5_years" }
+{ "_id" : ObjectId("62a20fe6b95714dc08dab8a5"), "Emp_id" : 6, "Name" : "Rekha", "Designation" : "CEO", "Experience" : "10_years" }
+
+
+db.Employee.update({Emp_id:2,Name:"Raj"},{$set:{Designation:"Administrator"}},{upsert:true});
+{ "_id" : ObjectId("62a210fa974e548155150b49"), "Emp_id" : 6, "Name" : "Rekha", "Designation" : "CEO", "Experience" : "10_years" }
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+
+db.Employee.find({Name:"Rekha"});
+{ "_id" : ObjectId("62a211bdaeca4b0619a5e33e"), "Emp_id" : 6, "Name" : "Rekha", "Designation" : "CEO", "Experience" : "10_years" }
+
+db.Employee.count();
+3
+
+db.Employee.find().limit(2);
+{ "_id" : ObjectId("62a20f4e5ac3ac8c60471ff7"), "Emp_id" : 1, "Name" : "Ravi", "Designation" : "Manager", "Experience" : "3_years" }
+{ "_id" : ObjectId("62a20fe6b95714dc08dab8a4"), "Emp_id" : 2, "Name" : "Raj", "Designation" : "HR", "Experience" : "5_years" }
+
+db.Employee.count({Designation:"HR"});
+1
