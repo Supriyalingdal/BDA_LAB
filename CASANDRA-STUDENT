@@ -1,0 +1,189 @@
+cqlsh> create keyspace Students with replication={'class':'SimpleStrategy','replication_factor':2};
+cqlsh> describe keyspaces;
+
+students  system_schema  system_auth  system  system_distributed  system_traces
+
+cqlsh> select *from system.schema_keyspaces;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="unconfigured table schema_keyspaces"
+cqlsh> use students;
+cqlsh:students> create table Student_Info(
+            ... RollNo int PRIMARY KEY,
+            ... StuName text,
+            ... DateOfjoining timestamp,
+            ... lastExamPercent double
+            ... );
+cqlsh:students> describe tables;
+
+student_info
+
+cqlsh:students> describe table student_info;
+
+CREATE TABLE students.student_info (
+    rollno int PRIMARY KEY,
+    dateofjoining timestamp,
+    lastexampercent double,
+    stuname text
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+
+cqlsh:students> begin batch
+            ... insert into student_info(rollno,stuname,dateofjoining,lastexampercent) values(1,'Micheal Storm','2012-03-29',69.6)
+            ... insert into student_info(rollno,stuname,dateofjoining,lastexampercent) values(2,'Albert inglan','2014-07-18',70.2)
+            ... insert into student_info(rollno,stuname,dateofjoining,lastexampercent) values(3,'Isha Jaganwal','2013-09-12',65.3)
+            ... insert into student_info(rollno,stuname,dateofjoining,lastexampercent) values(4,'Eshaan Pandey','2018-02-25',80.8)
+            ... apply batch;
+cqlsh:students> select *from student_info;
+
+ rollno | dateofjoining                   | lastexampercent | stuname
+--------+---------------------------------+-----------------+---------------
+      1 | 2012-03-28 18:30:00.000000+0000 |            69.6 | Micheal Storm
+      2 | 2014-07-17 18:30:00.000000+0000 |            70.2 | Albert inglan
+      4 | 2018-02-24 18:30:00.000000+0000 |            80.8 | Eshaan Pandey
+      3 | 2013-09-11 18:30:00.000000+0000 |            65.3 | Isha Jaganwal
+
+(4 rows)
+cqlsh:students> select *from student_info where rollno in(2,3);
+
+ rollno | dateofjoining                   | lastexampercent | stuname
+--------+---------------------------------+-----------------+---------------
+      2 | 2014-07-17 18:30:00.000000+0000 |            70.2 | Albert inglan
+      3 | 2013-09-11 18:30:00.000000+0000 |            65.3 | Isha Jaganwal
+
+(2 rows)
+cqlsh:students> create index on student_info(stuname);
+cqlsh:students> select *from student_info where stuname='Isha Jaganwal';
+
+ rollno | dateofjoining                   | lastexampercent | stuname
+--------+---------------------------------+-----------------+---------------
+      3 | 2013-09-11 18:30:00.000000+0000 |            65.3 | Isha Jaganwal
+
+(1 rows)
+cqlsh:students> create index on student_info(lastexampercent);
+cqlsh:students> select *from student_info where lastexampercent=80.8;
+
+ rollno | dateofjoining                   | lastexampercent | stuname
+--------+---------------------------------+-----------------+---------------
+      4 | 2018-02-24 18:30:00.000000+0000 |            80.8 | Eshaan Pandey
+
+(1 rows)
+cqlsh:students> select rollno from student_info limit 2;
+
+ rollno
+--------
+      1
+      2
+
+(2 rows)
+cqlsh:students> update student_info set stuname='David' where rollno=1;
+cqlsh:students> 
+cqlsh:students> update student_info set stuname='John',lastexampercent=90.1 where rollno=1;
+cqlsh:students> delete lastexampercent from student_info where rollno=2;
+cqlsh:students> create table Project_deatils(
+            ... project-id int,
+            ... project_name text,
+            ... stu_name text,
+            ... rating double,
+            ... duration int,
+            ... PRIMARY KEY(project-id,project_name);
+cqlsh:students> create table Project_deatils(project_id int, project_name text, stu_name text, rating double, duration int, PRIMARY KEY(project_id,project_name));
+cqlsh:students> create table Project_details(project_id int, project_name text, stu_name text, rating double, duration int, PRIMARY KEY(project_id,project_name));
+cqlsh:students> drop table project_deatils
+            ... ;
+cqlsh:students> insert into project_details(project_id,project_name,stu_name,rating,duration) values(1,'MS data migration','David sheen',5,720) ;
+cqlsh:students> begin batch
+            ... insert into project_details(project_id,project_name,stu_name,rating,duration) values(2,'computer networking','John',3.5,1440) 
+            ... insert into project_details(project_id,project_name,stu_name,rating,duration) values(3,'Data warehouse','Isha Jaganwal',4.5,880) 
+            ... insert into project_details(project_id,project_name,stu_name,rating,duration) values(3,'MS Data warehouse','lingdal',5.5,550); 
+            ... apply batch;
+cqlsh:students> select *from project_details;
+
+ project_id | project_name        | duration | rating | stu_name
+------------+---------------------+----------+--------+---------------
+          1 |   MS data migration |      720 |      5 |   David sheen
+          2 | computer networking |     1440 |    3.5 |          John
+          3 |      Data warehouse |      880 |    4.5 | Isha Jaganwal
+          3 |   MS Data warehouse |      550 |    5.5 |       lingdal
+
+(4 rows)
+cqlsh:students> alter table student_info ADD hobbies set<text>;
+cqlsh:students> update student_info set hobbies=hobbies+{'chess,table tennis'} where rollno=1;
+cqlsh:students> alter table student_info add language list<text>
+            ... ;
+cqlsh:students> update student_info set language=language+['Hindi,English'] where rollno=1;
+cqlsh:students> select *from student_info;
+
+ rollno | dateofjoining                   | hobbies                | language          | lastexampercent | stuname
+--------+---------------------------------+------------------------+-------------------+-----------------+---------------
+      1 | 2012-03-28 18:30:00.000000+0000 | {'chess,table tennis'} | ['Hindi,English'] |            90.1 |          John
+      2 | 2014-07-17 18:30:00.000000+0000 |                   null |              null |            null | Albert inglan
+      4 | 2018-02-24 18:30:00.000000+0000 |                   null |              null |            80.8 | Eshaan Pandey
+      3 | 2013-09-11 18:30:00.000000+0000 |                   null |              null |            65.3 | Isha Jaganwal
+
+(4 rows)
+cqlsh:students> copy student_info(rollno,dateofjoining,hobbies,language,lastexampercent,stuname)TO 'd:\student_details.csv';
+Using 11 child processes
+
+Starting copy of students.student_info with columns [rollno, dateofjoining, hobbies, language, lastexampercent, stuname].
+Processed: 4 rows; Rate:      33 rows/s; Avg. rate:      33 rows/s
+4 rows exported to 1 files in 0.148 seconds.
+cqlsh:students> truncate student_info;
+copy student_info(rollno,dateofjoining,hobbies,language,lastexampercent,stuname)TO 'd:\student_details.csv';
+Using 11 child processes
+
+Starting copy of students.student_info with columns [rollno, dateofjoining, hobbies, language, lastexampercent, stuname].
+Processed: 4 rows; Rate:      33 rows/s; Avg. rate:      33 rows/s
+4 rows exported to 1 files in 0.148 seconds.
+cqlsh:students> truncate student_info;
+cqlsh:students> 
+cqlsh:students> describe table student_info;
+
+CREATE TABLE students.student_info (
+    rollno int PRIMARY KEY,
+    dateofjoining timestamp,
+    hobbies set<text>,
+    language list<text>,
+    lastexampercent double,
+    stuname text
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+CREATE INDEX student_info_lastexampercent_idx ON students.student_info (lastexampercent);
+CREATE INDEX student_info_stuname_idx ON students.student_info (stuname);
+
+cqlsh:students> copy student_info(rollno,dateofjoining,hobbies,language,lastexampercent,stuname) FROM 'd:\student_details.csv';
+Using 11 child processes
+
+Starting copy of students.student_info with columns [rollno, dateofjoining, hobbies, language, lastexampercent, stuname].
+Processed: 4 rows; Rate:       6 rows/s; Avg. rate:       9 rows/s
+4 rows imported from 1 files in 0.440 seconds (0 skipped).
+cqlsh:students> select *from student_info;
+
+ rollno | dateofjoining                   | hobbies                | language          | lastexampercent | stuname
+--------+---------------------------------+------------------------+-------------------+-----------------+---------------
+      1 | 2012-03-28 18:30:00.000000+0000 | {'chess,table tennis'} | ['Hindi,English'] |            90.1 |          John
+      2 | 2014-07-17 18:30:00.000000+0000 |                   null |              null |            null | Albert inglan
+      4 | 2018-02-24 18:30:00.000000+0000 |                   null |              null |            80.8 | Eshaan Pandey
+      3 | 2013-09-11 18:30:00.000000+0000 |                   null |              null |            65.3 | Isha Jaganwal
