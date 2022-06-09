@@ -1,0 +1,81 @@
+cqlsh:employee> CREATE KEYSPACE employee WITH REPLICATION={ 'class' : 'SimpleStrategy', 'replication_factor' : 1};
+cqlsh:employee> USE employee;
+cqlsh:employee> create table employee_info(emp_id int PRIMARY KEY, emp_name text,
+            ... designation text, date_of_joining timestamp, salary double PRIMARY KEY, dept_name text);
+cqlsh:employee> CREATE TABLE employee_info(emp_id int, emp_name text, designation text, date_of_joining timestamp, salary double, dept_name text, PRIMARY KEY(emp_id, salary));
+cqlsh:employee> BEGIN BATCH INSERT INTO
+            ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+            ... VALUES(100,'Raj','MANAGER','2021-09-11',30000,'TESTING');
+            ... INSERT INTO
+            ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+            ... VALUES(101,'Ravi','ASSOCIATE','2021-06-22',25000,'DEVELOPING');
+            ... INSERT INTO
+            ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+            ... VALUES(102,'Ajay','HR','2021-03-30',35000,'HR');
+            ... INSERT INTO
+            ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+            ... VALUES(103,'Sheela','CEO','2021-12-30',20000,'DEVELOPING');
+            ... INSERT INTO
+            ... employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+            ... VALUES(104,'Sharat','ASSOCIATE','2021-06-25',25000,'TESTING');
+            ... APPLY BATCH;
+cqlsh:employee> SELECT * FROM employee_info;
+
+ emp_id | salary | date_of_joining                 | dept_name  | designation | emp_name
+--------+--------+---------------------------------+------------+-------------+----------
+    100 |  25000 | 2021-09-11 18:30:00.000000+0000 |    TESTING |    MANAGER  |    Raj
+    101 |  25000 | 2021-06-22 18:30:00.000000+0000 | DEVELOPING |   ASSOCIATE |    Ravi
+    102 |  35000 | 2021-03-30 18:30:00.000000+0000 |         HR |    HR       |    Ajay
+    103 |  20000 | 2021-12-30 18:30:00.000000+0000 | DEVELOPING |    CEO      |    Sheela
+    104 |  30000 | 2021-06-25 18:30:00.000000+0000 |    TESTING |   ASSOCIATE |    Sharat
+
+(5 rows)
+cqlsh:employee> UPDATE employee_info SET emp_name = 'Sumith', dept_name = 'TESTING' WHERE emp_id = 102 AND salary = 35000;
+cqlsh:employee> SELECT * FROM employee_info ;
+
+
+emp_id | salary | date_of_joining                 | dept_name  | designation | emp_name
+--------+--------+---------------------------------+------------+-------------+----------
+    100 |  25000 | 2021-09-11 18:30:00.000000+0000 |    TESTING |    MANAGER  |    Raj
+    101 |  25000 | 2021-06-22 18:30:00.000000+0000 | DEVELOPING |   ASSOCIATE |    Ravi
+    102 |  35000 | 2021-03-30 18:30:00.000000+0000 |         HR |   TESTING   |    Sumith
+    103 |  20000 | 2021-12-30 18:30:00.000000+0000 | DEVELOPING |    CEO      |    Sheela
+    104 |  30000 | 2021-06-25 18:30:00.000000+0000 |    TESTING |   ASSOCIATE |    Sharat
+
+(5 rows)
+cqlsh:employee> SELECT * FROM employee_info WHERE emp_id in (100, 101, 102, 103, 104) order by salary;
+emp_id | salary | date_of_joining                 | dept_name  | designation | emp_name
+--------+--------+---------------------------------+------------+-------------+----------
+    103 |  20000 | 2021-12-30 18:30:00.000000+0000 | DEVELOPING |    CEO      |    Sheela
+    100 |  25000 | 2021-09-11 18:30:00.000000+0000 |    TESTING |    MANAGER  |    Raj
+    101 |  25000 | 2021-06-22 18:30:00.000000+0000 | DEVELOPING |   ASSOCIATE |    Ravi
+    104 |  30000 | 2021-06-25 18:30:00.000000+0000 |    TESTING |   ASSOCIATE |    Sharat
+    102 |  35000 | 2021-03-30 18:30:00.000000+0000 |         HR |   TESTING   |    Sumith
+
+ 
+(5 rows)
+cqlsh:employee> ALTER TABLE employee_info ADD projects text;
+cqlsh:employee> UPDATE employee_info SET projects = 'Android' WHERE emp_id = 101;
+cqlsh:employee> UPDATE employee_info SET projects = 'IOT' WHERE emp_id = 102 and salary = 35000;
+cqlsh:employee> UPDATE employee_info SET projects = 'Deep learning' WHERE emp_id = 103 and salary = 20000;
+cqlsh:employee> UPDATE employee_info SET projects = 'ML' WHERE emp_id = 104 and salary = 30000;
+cqlsh:employee> UPDATE employee_info SET projects = 'AI' WHERE emp_id = 100 and salary = 25000;
+
+cqlsh:employee> SELECT * FROM employee_infor
+            ... ;
+cqlsh:employee> SELECT * FROM employee_info ;
+emp_id | salary | date_of_joining                 | dept_name  | designation | emp_name	  |Projects
+--------+--------+---------------------------------+------------+-------------+----------------------------------
+    103 |  20000 | 2021-12-30 18:30:00.000000+0000 | DEVELOPING |    CEO      |    Sheela |Deep learning
+    100 |  25000 | 2021-09-11 18:30:00.000000+0000 |    TESTING |    MANAGER  |    Raj	  |AI
+    101 |  25000 | 2021-06-22 18:30:00.000000+0000 | DEVELOPING |   ASSOCIATE |    Ravi   |Android
+    104 |  30000 | 2021-06-25 18:30:00.000000+0000 |    TESTING |   ASSOCIATE |    Sharat |ML
+    102 |  35000 | 2021-03-30 18:30:00.000000+0000 |         HR |   TESTING   |    SumitH |IOT 
+(5 rows)
+cqlsh:employee> INSERT INTO employee_info(emp_id,emp_name,designation,date_of_joining,salary,dept_name)
+            VALUES(110,'SAMARTH','OWNER','2021-01-11',90000,'LEADER') USING TTL 15;
+cqlsh:employee> SELECT TTL(emp_name) from employee_info WHERE emp_id = 110;
+
+ ttl(emp_name)
+---------------
+             3
